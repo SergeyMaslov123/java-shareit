@@ -89,15 +89,16 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public List<Item> searchItem(String text) {
         String textToLower = text.toLowerCase();
-        if(text.isEmpty() || text.isBlank()) {
+        if (text.isEmpty() || text.isBlank()) {
             return new ArrayList<>();
+        } else {
+            return items.values().stream()
+                    .flatMap(Collection::stream)
+                    .filter(item -> item.getName().toLowerCase().equals(textToLower)
+                            || item.getDescription().toLowerCase().contains(textToLower))
+                    .filter(Item::getAvailable)
+                    .collect(Collectors.toList());
         }
-        return items.values().stream()
-                .flatMap(Collection::stream)
-                .filter(item -> item.getName().toLowerCase().equals(textToLower)
-                        || item.getDescription().toLowerCase().contains(textToLower))
-                .filter(Item::getAvailable)
-                .collect(Collectors.toList());
     }
 
     private Integer getId() {

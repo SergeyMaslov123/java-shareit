@@ -15,7 +15,6 @@ public class ItemController {
     @GetMapping
     public List<ItemDto> getItemByUser(@RequestHeader("X-Sharer-User-Id") Integer userId) {
         return itemService.getItemByUserId(userId);
-
     }
 
     @PostMapping

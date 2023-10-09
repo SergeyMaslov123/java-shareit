@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Component
 public class UserRepositoryImpl implements UserRepository {
     private Map<Integer, User> allUsers = new HashMap<>();
@@ -22,7 +23,6 @@ public class UserRepositoryImpl implements UserRepository {
         id = id + 1;
         allUsers.put(user.getId(), user);
         return user;
-
     }
 
     @Override

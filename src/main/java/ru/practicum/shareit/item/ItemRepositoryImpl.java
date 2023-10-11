@@ -10,46 +10,39 @@ import java.util.stream.Collectors;
 
 @Component
 public class ItemRepositoryImpl implements ItemRepository {
-    private Map<Integer, List<Item>> items = new HashMap<>();
+    private Map<Integer, Item> items = new HashMap<>();
 
     @Override
     public Item addItem(Item item) {
         item.setId(getId());
         validateItem(item);
-        items.compute(item.getOwner(), (userId, userItems) -> {
-            if (userItems == null) {
-                userItems = new ArrayList<>();
-            }
-            userItems.add(item);
-            return userItems;
-        });
+        items.put(item.getId(), item);
         return item;
     }
 
     @Override
     public void deleteByUserIdAndItemId(int userId, int itemId) {
-        if (items.containsKey(userId)) {
-            List<Item> userItems = items.get(userId);
-            userItems.removeIf(item -> item.getId() == itemId);
+        if (items.containsKey(itemId)) {
+            Item item = items.get(itemId);
+            if (item.getOwner() == userId) {
+                items.remove(itemId);
+            } else {
+                throw new ValidationEx("Item не принадлежит данному User");
+            }
         }
     }
 
     @Override
     public List<Item> getItemsByUser(int userId) {
-        return items.getOrDefault(userId, Collections.emptyList());
+        return items.values().stream()
+                .filter(item -> item.getOwner() == userId)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Item getItem(int itemId) {
-        if (items.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .anyMatch(anyItem -> anyItem.getId() == itemId)) {
-            return items.values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .filter(item1 -> item1.getId() == itemId)
-                    .findAny().orElseThrow(() -> new NotFoundException("not found id"));
+        if (items.containsKey(itemId)) {
+            return items.get(itemId);
         } else {
             throw new NotFoundException("Item not found");//not found ex
         }
@@ -57,30 +50,21 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item updateItem(int userId, int itemId, Item item) {
-        if (items.containsKey(userId)) {
-            List<Item> itemsByUser = items.get(userId);
-            if (itemsByUser.stream().anyMatch(item1 -> item1.getId() == itemId)) {
-                itemsByUser.forEach(item1 -> {
-                    if (item1.getId() == itemId) {
-                        if (item.getName() != null) {
-                            validateName(item);
-                            item1.setName(item.getName());
-                        }
-
-                        if (item.getDescription() != null) {
-                            validateDescription(item);
-                            item1.setDescription(item.getDescription());
-                        }
-                        if (item.getAvailable() != null) {
-                            item1.setAvailable(item.getAvailable());
-                        }
-                    }
-                });
-                items.put(userId, itemsByUser);
-                return getItem(itemId);
-            } else {
-                throw new NotFoundException("Item not found");
+        if (items.containsKey(itemId)) {
+            Item item1 = items.get(itemId);
+            if (item.getName() != null) {
+                validateName(item);
+                item1.setName(item.getName());
             }
+            if (item.getDescription() != null) {
+                validateDescription(item);
+                item1.setDescription(item.getDescription());
+            }
+            if (item.getAvailable() != null) {
+                item1.setAvailable(item.getAvailable());
+            }
+            items.put(itemId, item1);
+            return item1;
         } else {
             throw new NotFoundException("User not item");
         }
@@ -93,7 +77,6 @@ public class ItemRepositoryImpl implements ItemRepository {
             return new ArrayList<>();
         } else {
             return items.values().stream()
-                    .flatMap(Collection::stream)
                     .filter(item -> item.getName().toLowerCase().equals(textToLower)
                             || item.getDescription().toLowerCase().contains(textToLower))
                     .filter(Item::getAvailable)
@@ -104,7 +87,6 @@ public class ItemRepositoryImpl implements ItemRepository {
     private Integer getId() {
         int lastId = items.values()
                 .stream()
-                .flatMap(Collection::stream)
                 .mapToInt(Item::getId)
                 .max()
                 .orElse(0);

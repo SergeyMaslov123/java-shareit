@@ -25,7 +25,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getUser(Integer id) {
         return Optional.ofNullable(allUsers.get(id))
-                .orElseThrow(()-> new EntityNotFoundException("user with id not found " + id));
+                .orElseThrow(() -> new EntityNotFoundException("user with id not found " + id));
     }
 
     @Override

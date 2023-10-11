@@ -52,21 +52,25 @@ public class ItemRepositoryImpl implements ItemRepository {
     public Item updateItem(int userId, int itemId, Item item) {
         if (items.containsKey(itemId)) {
             Item item1 = items.get(itemId);
-            if (item.getName() != null) {
-                validateName(item);
-                item1.setName(item.getName());
+            if (item1.getOwner() == userId) {
+                if (item.getName() != null) {
+                    validateName(item);
+                    item1.setName(item.getName());
+                }
+                if (item.getDescription() != null) {
+                    validateDescription(item);
+                    item1.setDescription(item.getDescription());
+                }
+                if (item.getAvailable() != null) {
+                    item1.setAvailable(item.getAvailable());
+                }
+                items.put(itemId, item1);
+                return items.get(itemId);
+            } else {
+                throw new ValidationEx("User not item");
             }
-            if (item.getDescription() != null) {
-                validateDescription(item);
-                item1.setDescription(item.getDescription());
-            }
-            if (item.getAvailable() != null) {
-                item1.setAvailable(item.getAvailable());
-            }
-            items.put(itemId, item1);
-            return item1;
         } else {
-            throw new NotFoundException("User not item");
+            throw new NotFoundException("Not found Item");
         }
     }
 

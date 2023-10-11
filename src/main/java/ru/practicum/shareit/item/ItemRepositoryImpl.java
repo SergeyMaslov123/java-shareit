@@ -67,7 +67,7 @@ public class ItemRepositoryImpl implements ItemRepository {
                 items.put(itemId, item1);
                 return items.get(itemId);
             } else {
-                throw new ValidationEx("User not item");
+                throw new NotFoundException("User not item");
             }
         } else {
             throw new NotFoundException("Not found Item");

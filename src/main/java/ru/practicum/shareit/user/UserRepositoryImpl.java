@@ -2,13 +2,10 @@ package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ConflictEx;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationEx;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class UserRepositoryImpl implements UserRepository {
@@ -27,11 +24,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User getUser(Integer id) {
-        if (allUsers.containsKey(id)) {
-            return allUsers.get(id);
-        } else {
-            throw new NotFoundException("user not found");
-        }
+        return Optional.ofNullable(allUsers.get(id))
+                .orElseThrow(()-> new EntityNotFoundException("user with id not found " + id));
     }
 
     @Override
@@ -56,7 +50,7 @@ public class UserRepositoryImpl implements UserRepository {
             allUsers.put(userId, user);
             return user;
         } else {
-            throw new NotFoundException("User not found");
+            throw new EntityNotFoundException("User not found");
         }
     }
 
@@ -65,7 +59,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (allUsers.containsKey(userId)) {
             allUsers.remove(userId);
         } else {
-            throw new NotFoundException("User not found");
+            throw new EntityNotFoundException("User not found");
         }
     }
 

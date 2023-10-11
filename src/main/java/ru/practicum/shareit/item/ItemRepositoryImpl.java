@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.item.model.Item;
 
@@ -41,11 +41,8 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item getItem(int itemId) {
-        if (items.containsKey(itemId)) {
-            return items.get(itemId);
-        } else {
-            throw new NotFoundException("Item not found");//not found ex
-        }
+        return Optional.ofNullable(items.get(itemId))
+                .orElseThrow(() -> new EntityNotFoundException("Item with id not found" + itemId));
     }
 
     @Override
@@ -67,10 +64,10 @@ public class ItemRepositoryImpl implements ItemRepository {
                 items.put(itemId, item1);
                 return items.get(itemId);
             } else {
-                throw new NotFoundException("User not item");
+                throw new EntityNotFoundException("User not item");
             }
         } else {
-            throw new NotFoundException("Not found Item");
+            throw new EntityNotFoundException("Not found Item");
         }
     }
 

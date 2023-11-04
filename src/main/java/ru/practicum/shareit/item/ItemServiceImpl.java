@@ -84,7 +84,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemDtoBooking getItem(long itemId, long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new EntityNotFoundException("item not"));
-
         return getLastAndNextBooking(item, userId);
     }
 

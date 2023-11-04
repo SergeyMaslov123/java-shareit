@@ -13,7 +13,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private static long generatedIdUser = 1l;
+    private static long generatedIdUser = 1L;
 
     @Override
     @Transactional

@@ -37,8 +37,8 @@ public class ItemServiceImpl implements ItemService {
         validateName(item);
         validateDescription(item);
         validateAvailable(item);
-        User user = userRepository.findById(userId).
-                orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         item.setOwner(user);
         return ItemMapper.toItemDto(itemRepository.save(item));
     }

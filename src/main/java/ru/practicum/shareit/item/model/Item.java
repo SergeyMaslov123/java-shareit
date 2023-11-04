@@ -26,7 +26,7 @@ public class Item {
     @Column(name = "available")
     private Boolean available;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner" , referencedColumnName = "id")
+    @JoinColumn(name = "owner", referencedColumnName = "id")
     @ToString.Exclude
     private User owner;
     @ManyToOne(fetch = FetchType.LAZY)

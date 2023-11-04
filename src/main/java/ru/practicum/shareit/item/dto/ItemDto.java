@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Value;
-import ru.practicum.shareit.request.ItemRequest;
 
 @Value
 public class ItemDto {
+    Long id;
     String name;
     String description;
     Boolean available;
-    Integer owner;
-    int id;
-    ItemRequest request;
+    Long owner;
+    Long request;
 }

@@ -3,39 +3,47 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationEx;
+import ru.practicum.shareit.user.dto.Marker;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Validated
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private long generatedIdUser = 1L;
 
     @Override
     @Transactional
-    public User addUser(User user) {
-        validEmail(user);
-        validName(user);
+    @Validated({Marker.OnCreate.class})
+    public UserDto addUser(@Valid UserDto userDto) {
+        User user = UserMapper.toUser(userDto);
         user.setId(generatedIdUser);
         generatedIdUser++;
-        return userRepository.save(user);
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
-    public User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+    public UserDto getUser(Long userId) {
+        return UserMapper.toUserDto(userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("user not found")));
     }
 
     @Override
     @Transactional
-    public User updateUser(Long userId, User user) {
+    public UserDto updateUser(Long userId, UserDto userDto) {
         User oldUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
+        User user = UserMapper.toUser(userDto);
         if (user.getEmail() != null && user.getName() == null) {
             validEmail(user);
             user.setName(oldUser.getName());
@@ -49,7 +57,7 @@ public class UserServiceImpl implements UserService {
             throw new ValidationEx("email/ name is empty");
         }
         user.setId(userId);
-        return userRepository.save(user);
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
@@ -59,8 +67,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> allUser() {
-        return userRepository.findAll();
+    public List<UserDto> allUser() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     private void validEmail(User user) {

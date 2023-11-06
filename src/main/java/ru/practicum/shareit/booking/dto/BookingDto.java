@@ -4,9 +4,6 @@ import lombok.Value;
 import ru.practicum.shareit.booking.Status;
 
 
-/**
- * TODO Sprint add-bookings.
- */
 @Value
 public class BookingDto {
     Long id;

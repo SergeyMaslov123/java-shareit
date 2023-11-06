@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
 import ru.practicum.shareit.item.dto.ItemMapper;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Validated
 public class BookingMapper {
 
     public static BookingDto toBookingDto(Booking booking) {

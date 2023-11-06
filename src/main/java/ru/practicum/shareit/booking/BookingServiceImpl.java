@@ -92,101 +92,127 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoAnswer> getAllBookingsForUserId(Long userId, String state) {
-        List<Booking> allBookingForUser = bookingRepository.getAllBookingsForUserId(userId);
-        if (allBookingForUser.isEmpty()) {
-            throw new EntityNotFoundException("User not booking");
+    public List<BookingDtoAnswer> getAllBookingsForUserId(Long userId, String stateStr) {
+        State state;
+        try {
+            state = State.valueOf(stateStr);
+        } catch (IllegalArgumentException ex) {
+            throw new ValidationEx("Unknown state: " + stateStr);
         }
-        System.out.println("all bookings for user " + allBookingForUser);
+        List<BookingDtoAnswer> allBookings;
         switch (state) {
-            case "ALL":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
+            case ALL:
+                allBookings = bookingRepository.findByBooker_IdOrderByStartDesc(userId).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "PAST":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+
+            case PAST:
+                allBookings = bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        )
+                        .stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "WAITING":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStatus().equals(Status.WAITING))
+                break;
+            case WAITING:
+                allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "REJECTED":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStatus().equals(Status.REJECTED))
+                break;
+
+            case REJECTED:
+                allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "CURRENT":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStart().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())
-                                && booking.getEnd().isAfter(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+            case CURRENT:
+                allBookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        ).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "FUTURE":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStart().isAfter(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+            case FUTURE:
+                allBookings = bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        ).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
+                break;
             default:
                 throw new ValidationEx("Unknown state: " + state);
-
+        }
+        if (allBookings.isEmpty()) {
+            throw new EntityNotFoundException("User not booking");
+        } else {
+            return allBookings;
         }
     }
 
     @Override
-    public List<BookingDtoAnswer> getAllBookingForUserOwner(Long userId, String state) {
-        List<Booking> allBookingForUser = bookingRepository.getAllBookingsForUserItemId(userId);
-        if (allBookingForUser.isEmpty()) {
-            throw new EntityNotFoundException("User not booking");
+    public List<BookingDtoAnswer> getAllBookingForUserOwner(Long userId, String stateStr) {
+        State state;
+        try {
+            state = State.valueOf(stateStr);
+        } catch (IllegalArgumentException ex) {
+            throw new ValidationEx("Unknown state: " + stateStr);
+
         }
-        System.out.println("all bookings for item " + allBookingForUser);
+        List<BookingDtoAnswer> allBookings;
         switch (state) {
-            case "ALL":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
+            case ALL:
+                allBookings = bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "PAST":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+            case PAST:
+                allBookings = bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        )
+                        .stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "WAITING":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStatus().equals(Status.WAITING))
+                break;
+            case WAITING:
+                allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "REJECTED":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStatus().equals(Status.REJECTED))
+                break;
+            case REJECTED:
+                allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "CURRENT":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStart().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())
-                                && booking.getEnd().isAfter(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+            case CURRENT:
+                allBookings = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        ).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
-            case "FUTURE":
-                return allBookingForUser.stream()
-                        .sorted((b1, b2) -> b2.getStart().compareTo(b1.getStart()))
-                        .filter(booking -> booking.getStart().isAfter(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+                break;
+            case FUTURE:
+                allBookings = bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(
+                                userId,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        ).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
+                break;
             default:
                 throw new ValidationEx("Unknown state: " + state);
+        }
+        if (allBookings.isEmpty()) {
+            throw new EntityNotFoundException("User not booking");
+        } else {
+            return allBookings;
         }
     }
 }

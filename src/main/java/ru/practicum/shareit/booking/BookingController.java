@@ -7,11 +7,8 @@ import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-bookings.
- */
 @RequiredArgsConstructor
-@RestController
+@RestControllerAdvice
 @RequestMapping(path = "/bookings")
 public class BookingController {
     private final BookingService bookingService;

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.ValidationEx;
@@ -12,11 +13,13 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Service
 @AllArgsConstructor
+@Validated
 public class CommentsServiceImpl implements CommentsService {
     private final CommentsRepository commentsRepository;
     private final ItemRepository itemRepository;
@@ -24,10 +27,8 @@ public class CommentsServiceImpl implements CommentsService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public CommentDto addComments(CommentDto commentDto, Long itemId, Long userId) {
-        if (commentDto.getText() == null || commentDto.getText().isEmpty() || commentDto.getText().isBlank()) {
-            throw new ValidationEx("comment text is empty");
-        }
+    @Validated
+    public CommentDto addComments(@Valid CommentDto commentDto, Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ValidationEx("item not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new ValidationEx("User not found"));
         if (!bookingRepository.findByBooker_IdAndItem_IdAndStatusAndEndIsBeforeOrderByStartDesc(

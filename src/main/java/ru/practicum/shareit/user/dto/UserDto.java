@@ -16,6 +16,7 @@ public class UserDto {
     @Size(max = 255)
     String name;
     @Email(groups = Marker.OnCreate.class)
+    @Email(groups = Marker.OnUpdate.class)
     @NotEmpty(groups = Marker.OnCreate.class)
     @Size(max = 512)
     String email;

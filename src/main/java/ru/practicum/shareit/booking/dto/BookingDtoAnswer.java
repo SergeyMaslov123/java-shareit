@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.dto;
 import lombok.Value;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.dto.ItemDtoForBookingRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDtoForBookingRequest;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +13,6 @@ public class BookingDtoAnswer {
     LocalDateTime start;
     LocalDateTime end;
     ItemDtoForBookingRequest item;
-    User booker;
+    UserDtoForBookingRequest booker;
     Status status;
 }

@@ -16,7 +16,6 @@ public class ItemMapper {
                     item.getName(),
                     item.getDescription(),
                     item.getAvailable(),
-                    item.getOwner().getId(),
                     item.getRequest().getId()
             );
         } else {
@@ -25,7 +24,6 @@ public class ItemMapper {
                     item.getName(),
                     item.getDescription(),
                     item.getAvailable(),
-                    item.getOwner().getId(),
                     null);
         }
     }
@@ -68,6 +66,7 @@ public class ItemMapper {
     }
 
     public static ItemDtoForBookingRequest toItemDtoForBR(Item item) {
-        return new ItemDtoForBookingRequest(item.getId(), item.getName());
+        return new ItemDtoForBookingRequest(item.getId(),
+                item.getName());
     }
 }

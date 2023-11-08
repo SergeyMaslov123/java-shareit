@@ -3,27 +3,30 @@ package ru.practicum.shareit.item;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.dto.Marker;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 @Transactional(readOnly = true)
+@Validated
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -32,11 +35,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto addItem(ItemDto itemDto, long userId) {
+    @Validated({Marker.OnCreate.class})
+    public ItemDto addItem(@Valid ItemDto itemDto, long userId) {
         Item item = ItemMapper.toDtoItem(itemDto);
-        validateName(item);
-        validateDescription(item);
-        validateAvailable(item);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         item.setOwner(user);
@@ -63,12 +64,10 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
         if (oldItem.getOwner().getId() == userId) {
             Item newItem = ItemMapper.toDtoItem(itemDto);
-            if (newItem.getName() != null) {
-                validateName(newItem);
+            if (newItem.getName() != null && !newItem.getName().isBlank()) {
                 oldItem.setName(newItem.getName());
             }
-            if (newItem.getDescription() != null) {
-                validateDescription(newItem);
+            if (newItem.getDescription() != null && !newItem.getDescription().isBlank()) {
                 oldItem.setDescription(newItem.getDescription());
             }
             if (newItem.getAvailable() != null) {
@@ -89,69 +88,47 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItem(String text) {
-        if (text.isEmpty() || text.isBlank()) {
-            return new ArrayList<>();
+        if (text.isBlank()) {
+            return Collections.emptyList();
         } else {
             String textToLower = text.toLowerCase();
             return itemRepository.searchItem(textToLower).stream()
                     .map(ItemMapper::toItemDto)
-                    .filter(ItemDto::getAvailable)
                     .collect(Collectors.toList());
         }
     }
 
-    private void validateName(Item item) {
-        if (item.getName() == null || item.getName().isEmpty() || item.getName().isBlank()) {
-            throw new ValidationEx("недопустимые параметры name");
-        }
-    }
-
-    private void validateAvailable(Item item) {
-        if (item.getAvailable() == null) {
-            throw new ValidationEx("недопустимые параметры available");
-        }
-    }
-
-    private void validateDescription(Item item) {
-        if (item.getDescription() == null || item.getDescription().isBlank() || item.getDescription().isEmpty()) {
-            throw new ValidationEx("недопустимые параметры Description");
-        }
-    }
-
     private ItemDtoBooking getLastAndNextBooking(Item item, long userId) {
-        List<Booking> allBookingsForItem = bookingRepository.findByItemId(item.getId()).stream()
-                .filter(booking -> booking.getStatus().equals(Status.APPROVED))
-                .collect(Collectors.toList());
         List<CommentDto> comments = commentsRepository.findByItemId(item.getId()).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
-        if (!allBookingsForItem.isEmpty() && item.getOwner().getId().equals(userId)) {
-            List<Booking> allLastBooking = new ArrayList<>();
-            List<Booking> allNextBooking = new ArrayList<>();
-            allBookingsForItem.forEach(booking -> {
-                if (booking.getStart().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())) {
-                    allLastBooking.add(booking);
-                }
-                if (booking.getStart().isAfter(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())) {
-                    allNextBooking.add(booking);
-                }
-            });
-            BookingDto lastBooking = null;
-            if (!allLastBooking.isEmpty()) {
-                lastBooking = BookingMapper.toBookingDto(allLastBooking.stream()
-                        .min((b2, b1) -> b1.getStart().compareTo(b2.getStart()))
-                        .get());
-            }
-            BookingDto nextBooking = null;
-            if (!allNextBooking.isEmpty()) {
-                nextBooking = BookingMapper.toBookingDto(allNextBooking.stream()
-                        .max((b2, b1) -> b1.getStart().compareTo(b2.getStart()))
-                        .get());
-            }
-            return ItemMapper.toItemDtoBooking(item, lastBooking,
-                    nextBooking, comments);
-        } else {
-            return ItemMapper.toItemDtoBooking(item, null, null, comments);
+        List<Booking> allLastBookings = bookingRepository.findByItem_IdAndStatusAndStartIsBeforeOrderByStartDesc(
+                item.getId(),
+                Status.APPROVED,
+                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());
+
+        BookingDto lastBooking = null;
+        if (!allLastBookings.isEmpty() && item.getOwner().getId().equals(userId)) {
+            lastBooking = allLastBookings
+                    .stream()
+                    .findFirst()
+                    .map(BookingMapper::toBookingDto)
+                    .get();
         }
+
+        List<Booking> allNextBooking = bookingRepository.findByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(
+                item.getId(),
+                Status.APPROVED,
+                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());
+        BookingDto nextBooking = null;
+        if (!allNextBooking.isEmpty() && item.getOwner().getId().equals(userId)) {
+            nextBooking = allNextBooking
+                    .stream()
+                    .findFirst()
+                    .map(BookingMapper::toBookingDto)
+                    .get();
+        }
+        return ItemMapper.toItemDtoBooking(item, lastBooking,
+                nextBooking, comments);
     }
 }

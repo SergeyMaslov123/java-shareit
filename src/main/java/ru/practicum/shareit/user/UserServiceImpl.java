@@ -40,20 +40,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto updateUser(Long userId, UserDto userDto) {
+    @Validated({Marker.OnUpdate.class})
+    public UserDto updateUser(Long userId, @Valid UserDto userDto) {
         User oldUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
         User user = UserMapper.toUser(userDto);
-        if (user.getEmail() != null && user.getName() == null) {
-            validEmail(user);
+        String name = user.getName();
+        String email = user.getEmail();
+        if (name == null || name.isBlank()) {
             user.setName(oldUser.getName());
-        } else if (user.getName() != null && user.getEmail() == null) {
-            validName(user);
+        } else if (email == null || email.isBlank()) {
             user.setEmail(oldUser.getEmail());
-        } else if (user.getName() != null) {
-            validName(user);
-            validEmail(user);
-        } else {
+        } else if (user.getName() == null && user.getEmail() == null) {
             throw new ValidationEx("email/ name is empty");
         }
         user.setId(userId);
@@ -71,20 +69,5 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
-    }
-
-    private void validEmail(User user) {
-        if (user.getEmail() == null
-                || user.getEmail().isBlank()
-                || user.getEmail().isEmpty()
-                || !user.getEmail().contains("@")) {
-            throw new ValidationEx("Неверный email");
-        }
-    }
-
-    private void validName(User user) {
-        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-            throw new ValidationEx("name is empty");
-        }
     }
 }

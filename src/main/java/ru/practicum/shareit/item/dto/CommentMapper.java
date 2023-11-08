@@ -24,4 +24,8 @@ public class CommentMapper {
                 null,
                 null);
     }
+
+    public static CommentDtoAnswer commentDtoAnswer(Comment comment) {
+        return new CommentDtoAnswer(comment.getId(), comment.getText());
+    }
 }

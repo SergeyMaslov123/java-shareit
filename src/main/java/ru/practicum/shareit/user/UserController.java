@@ -1,19 +1,18 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RestControllerAdvice
+@RestController
+@Validated
 @RequestMapping("/users")
 public class UserController {
-    public final UserService userService;
+    private final UserService userService;
 
     @PostMapping
     public UserDto addUser(@RequestBody UserDto userDto) {
@@ -40,9 +39,4 @@ public class UserController {
         return userService.updateUser(userId, userDto);
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ValidationEx handle(final ConstraintViolationException ex) {
-        return new ValidationEx("Bad request");
-    }
 }

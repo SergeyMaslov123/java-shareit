@@ -14,4 +14,8 @@ public class UserMapper {
         return new User(null, userDto.getName(), userDto.getEmail());
     }
 
+    public static UserDtoForBookingRequest toUserDtoFbr(User user) {
+        return new UserDtoForBookingRequest(user.getId());
+    }
+
 }

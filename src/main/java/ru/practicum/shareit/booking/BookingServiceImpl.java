@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
 import ru.practicum.shareit.exception.EntityNotFoundException;
@@ -12,6 +13,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Validated
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
@@ -27,15 +30,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDtoAnswer addBooking(Long userId, BookingDto bookingDto) {
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null ||
-                bookingDto.getStart().isBlank() || bookingDto.getEnd().isBlank()) {
-            throw new ValidationEx("start/end null");
-        }
+    @Validated
+    public BookingDtoAnswer addBooking(Long userId, @Valid BookingDto bookingDto) {
         Booking booking = BookingMapper.toBooking(bookingDto);
-        if (booking.getStart().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()) ||
-                booking.getEnd().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()) ||
-                booking.getStart().isAfter(booking.getEnd()) ||
+        if (booking.getStart().isAfter(booking.getEnd()) ||
                 booking.getStart().equals(booking.getEnd())) {
             throw new ValidationEx("неправильные даты");
         }
@@ -70,19 +68,17 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDtoAnswer approvedBooking(Long userId, Long bookingId, String approved) {
+    public BookingDtoAnswer approvedBooking(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
         if (!booking.getStatus().equals(Status.WAITING)) {
             throw new ValidationEx("status not waiting");
         }
         if (booking.getItem().getOwner().getId().equals(userId)) {
-            if (approved.equals("true")) {
+            if (approved) {
                 booking.setStatus(Status.APPROVED);
-            } else if (approved.equals("false")) {
-                booking.setStatus(Status.REJECTED);
             } else {
-                throw new ValidationEx("Неверный approved");
+                booking.setStatus(Status.REJECTED);
             }
             bookingRepository.save(booking);
             return BookingMapper.toBookingDtoAnswer(booking);
@@ -128,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
                         .collect(Collectors.toList());
                 break;
             case CURRENT:
-                allBookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                allBookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(
                                 userId,
                                 LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
                                 LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()

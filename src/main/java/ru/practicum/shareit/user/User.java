@@ -6,10 +6,8 @@ import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Entity
-@Getter
-@Setter
-@ToString
 @Table(name = "users", schema = "public")
 public class User {
     @Id

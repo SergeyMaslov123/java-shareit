@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.user.dto.UserMapper;
 
@@ -44,6 +45,17 @@ public class BookingMapper {
                 ItemMapper.toItemDtoForBR(booking.getItem()),
                 UserMapper.toUserDtoFbr(booking.getBooker()),
                 booking.getStatus());
+    }
+
+    public static Booking toBookingFromRequest(BookingDtoRequest bookingDtoRequest) {
+        Instant startDate = bookingDtoRequest.getStart().atZone(ZoneOffset.UTC).toInstant();
+        Instant endDate = bookingDtoRequest.getEnd().atZone(ZoneOffset.UTC).toInstant();
+        return new Booking(bookingDtoRequest.getId(),
+                startDate,
+                endDate,
+                null,
+                null,
+                null);
     }
 
 }

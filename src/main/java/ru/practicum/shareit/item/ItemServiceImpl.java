@@ -19,10 +19,7 @@ import ru.practicum.shareit.user.dto.Marker;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -62,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .collect(Collectors.groupingBy(Comment::getItem));
         Map<Item, List<Booking>> allLastBokingsMap =
-                bookingRepository.findAllByItem_IdInAndStatusAndStartIsBeforeOrderByStartDesc(
+                bookingRepository.findAllByItem_IdInAndStatusAndStartLessThanEqualOrderByStartDesc(
                                 itemsForUser.keySet(),
                                 Status.APPROVED,
                                 LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())
@@ -76,9 +73,9 @@ public class ItemServiceImpl implements ItemService {
                         ).stream()
                         .collect(Collectors.groupingBy(Booking::getItem));
 
-        List<ItemDtoBooking> allItem = new ArrayList<>();
+        List<ItemDtoBooking> allItem = new LinkedList<>();
         for (Item item : itemsForUser.values()) {
-            List<CommentDto> allComment = new ArrayList<>();
+            List<CommentDto> allComment = new LinkedList<>();
             BookingDto lastBooking = null;
             BookingDto nextBooking = null;
             if (!allLastBokingsMap.isEmpty() && allLastBokingsMap.containsKey(item)) {
@@ -146,33 +143,24 @@ public class ItemServiceImpl implements ItemService {
         List<CommentDto> comments = commentsRepository.findByItemId(item.getId()).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
-        List<Booking> allLastBookings = bookingRepository.findByItem_IdAndStatusAndStartIsBeforeOrderByStartDesc(
+        BookingDto lastBookingDto = null;
+        Booking lastBooking = bookingRepository.findFirstByItem_IdAndStatusAndStartLessThanEqualOrderByStartDesc(
+                item.getId(),
+                Status.APPROVED,
+                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+        );
+        if (lastBooking != null && item.getOwner().getId().equals(userId)) {
+            lastBookingDto = BookingMapper.toBookingDto(lastBooking);
+        }
+        Booking nextBooking = bookingRepository.findFirstByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(
                 item.getId(),
                 Status.APPROVED,
                 LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());
-
-        BookingDto lastBooking = null;
-        if (!allLastBookings.isEmpty() && item.getOwner().getId().equals(userId)) {
-            lastBooking = allLastBookings
-                    .stream()
-                    .findFirst()
-                    .map(BookingMapper::toBookingDto)
-                    .get();
+        BookingDto nextBookingDto = null;
+        if (nextBooking != null && item.getOwner().getId().equals(userId)) {
+            nextBookingDto = BookingMapper.toBookingDto(nextBooking);
         }
-
-        List<Booking> allNextBooking = bookingRepository.findByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(
-                item.getId(),
-                Status.APPROVED,
-                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());
-        BookingDto nextBooking = null;
-        if (!allNextBooking.isEmpty() && item.getOwner().getId().equals(userId)) {
-            nextBooking = allNextBooking
-                    .stream()
-                    .findFirst()
-                    .map(BookingMapper::toBookingDto)
-                    .get();
-        }
-        return ItemMapper.toItemDtoBooking(item, lastBooking,
-                nextBooking, comments);
+        return ItemMapper.toItemDtoBooking(item, lastBookingDto,
+                nextBookingDto, comments);
     }
 }

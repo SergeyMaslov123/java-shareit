@@ -2,8 +2,8 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.item.Constants;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDtoAnswer addBooking(@RequestHeader(Constants.HEADER) Long userId,
-                                       @RequestBody BookingDto bookingDto) {
+                                       @RequestBody BookingDtoRequest bookingDto) {
         return bookingService.addBooking(userId, bookingDto);
     }
 

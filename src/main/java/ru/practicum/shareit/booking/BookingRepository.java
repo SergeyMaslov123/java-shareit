@@ -29,12 +29,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByBooker_IdAndItem_IdAndStatusAndEndIsBefore(Long bookerId, Long itemId, Status status, Instant end);
 
-    List<Booking> findByItem_IdAndStatusAndStartIsBeforeOrderByStartDesc(Long itemId, Status status, Instant start);
-
-    List<Booking> findByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(Long itemId, Status status, Instant start);
-
-    List<Booking> findAllByItem_IdInAndStatusAndStartIsBeforeOrderByStartDesc(Set<Long> ids, Status status, Instant instant);
+    List<Booking> findAllByItem_IdInAndStatusAndStartLessThanEqualOrderByStartDesc(Set<Long> ids, Status status, Instant instant);
 
     List<Booking> findAllByItem_IdInAndStatusAndStartIsAfterOrderByStartAsc(Set<Long> ids, Status status, Instant instant);
+
+    Booking findFirstByItem_IdAndStatusAndStartLessThanEqualOrderByStartDesc(Long itemId, Status status, Instant start);
+
+    Booking findFirstByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(Long itemId, Status status, Instant start);
 
 }

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.item.ItemRepository;
@@ -30,13 +30,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDtoAnswer addBooking(Long userId, @Valid BookingDto bookingDto) {
-        Booking booking = BookingMapper.toBooking(bookingDto);
+    public BookingDtoAnswer addBooking(Long userId, @Valid BookingDtoRequest bookingDtoRequest) {
+        Booking booking = BookingMapper.toBookingFromRequest(bookingDtoRequest);
         if (booking.getStart().isAfter(booking.getEnd()) ||
                 booking.getStart().equals(booking.getEnd())) {
             throw new ValidationEx("неправильные даты");
         }
-        Item item = itemRepository.findById(bookingDto.getItemId())
+        Item item = itemRepository.findById(bookingDtoRequest.getItemId())
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));

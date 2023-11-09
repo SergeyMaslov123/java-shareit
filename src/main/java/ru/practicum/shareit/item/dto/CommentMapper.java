@@ -25,7 +25,11 @@ public class CommentMapper {
                 null);
     }
 
-    public static CommentDtoAnswer commentDtoAnswer(Comment comment) {
-        return new CommentDtoAnswer(comment.getId(), comment.getText());
+    public static Comment toCommentFromRequest(CommentDtoRequest commentDtoRequest) {
+        return new Comment(null,
+                commentDtoRequest.getText(),
+                null,
+                null,
+                null);
     }
 }

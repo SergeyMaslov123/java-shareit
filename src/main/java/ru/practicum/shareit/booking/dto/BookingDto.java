@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.Value;
-import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.booking.Status;
 
 import javax.validation.constraints.Future;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 
 
 @Value
-@Validated
 public class BookingDto {
     Long id;
     @FutureOrPresent

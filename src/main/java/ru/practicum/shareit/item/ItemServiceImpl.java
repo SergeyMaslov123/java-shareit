@@ -11,16 +11,19 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.Marker;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     @Validated({Marker.OnCreate.class})
-    public ItemDto addItem(@Valid ItemDto itemDto, long userId) {
+    public ItemDto addItem(ItemDto itemDto, long userId) {
         Item item = ItemMapper.toDtoItem(itemDto);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -52,13 +55,55 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoBooking> getItemByUserId(long owner) {
-        return itemRepository.findByOwnerId(owner).stream()
-                .map(item -> getLastAndNextBooking(item, owner))
-                .collect(Collectors.toList());
+        Map<Long, Item> itemsForUser = itemRepository.findByOwnerId(owner)
+                .stream()
+                .collect(Collectors.toMap(Item::getId, Function.identity()));
+        Map<Item, List<Comment>> commentsMap = commentsRepository.findAllByItemIdInOrderByCreatedAsc(itemsForUser.keySet())
+                .stream()
+                .collect(Collectors.groupingBy(Comment::getItem));
+        Map<Item, List<Booking>> allLastBokingsMap =
+                bookingRepository.findAllByItem_IdInAndStatusAndStartIsBeforeOrderByStartDesc(
+                                itemsForUser.keySet(),
+                                Status.APPROVED,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())
+                        .stream()
+                        .collect(Collectors.groupingBy(Booking::getItem));
+        Map<Item, List<Booking>> allNextBooking =
+                bookingRepository.findAllByItem_IdInAndStatusAndStartIsAfterOrderByStartAsc(
+                                itemsForUser.keySet(),
+                                Status.APPROVED,
+                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                        ).stream()
+                        .collect(Collectors.groupingBy(Booking::getItem));
+
+        List<ItemDtoBooking> allItem = new ArrayList<>();
+        for (Item item : itemsForUser.values()) {
+            List<CommentDto> allComment = new ArrayList<>();
+            BookingDto lastBooking = null;
+            BookingDto nextBooking = null;
+            if (!allLastBokingsMap.isEmpty() && allLastBokingsMap.containsKey(item)) {
+                lastBooking = BookingMapper.toBookingDto(allLastBokingsMap.get(item).get(0));
+            }
+            if (!allNextBooking.isEmpty() && allNextBooking.containsKey(item)) {
+                nextBooking = BookingMapper.toBookingDto(allNextBooking.get(item).get(0));
+            }
+            if (!commentsMap.isEmpty() && commentsMap.containsKey(item)) {
+                allComment = commentsMap.get(item).stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList());
+            }
+            allItem.add(ItemMapper.toItemDtoBooking(
+                    item,
+                    lastBooking,
+                    nextBooking,
+                    allComment));
+        }
+        return allItem;
     }
 
     @Override
     @Transactional
+    @Validated(Marker.OnUpdate.class)
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not found"));
@@ -91,8 +136,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return Collections.emptyList();
         } else {
-            String textToLower = text.toLowerCase();
-            return itemRepository.searchItem(textToLower).stream()
+            return itemRepository.searchItem(text).stream()
                     .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }

@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoRequest;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -27,17 +28,15 @@ public class CommentsServiceImpl implements CommentsService {
     private final BookingRepository bookingRepository;
 
     @Override
-    @Validated
-    public CommentDto addComments(@Valid CommentDto commentDto, Long itemId, Long userId) {
+    public CommentDto addComments(@Valid CommentDtoRequest commentDtoRequest, Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new ValidationEx("item not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new ValidationEx("User not found"));
-        if (!bookingRepository.findByBooker_IdAndItem_IdAndStatusAndEndIsBeforeOrderByStartDesc(
-                        userId,
-                        itemId,
-                        Status.APPROVED,
-                        LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())
-                .isEmpty()) {
-            Comment comment = CommentMapper.toComment(commentDto);
+        if (bookingRepository.existsByBooker_IdAndItem_IdAndStatusAndEndIsBefore(
+                userId,
+                itemId,
+                Status.APPROVED,
+                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant())) {
+            Comment comment = CommentMapper.toCommentFromRequest(commentDtoRequest);
             comment.setItem(item);
             comment.setAuthor(user);
             comment.setCreated(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());

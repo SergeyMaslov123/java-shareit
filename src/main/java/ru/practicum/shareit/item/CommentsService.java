@@ -1,11 +1,11 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.validation.annotation.Validated;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoRequest;
 
 import javax.validation.Valid;
 
-@Validated
+
 public interface CommentsService {
-    CommentDto addComments(@Valid CommentDto commentDto, Long itemId, Long userId);
+    CommentDto addComments(@Valid CommentDtoRequest commentDtoRequest, Long itemId, Long userId);
 }

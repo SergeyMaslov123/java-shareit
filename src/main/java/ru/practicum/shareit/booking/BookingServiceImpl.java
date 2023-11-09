@@ -30,7 +30,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    @Validated
     public BookingDtoAnswer addBooking(Long userId, @Valid BookingDto bookingDto) {
         Booking booking = BookingMapper.toBooking(bookingDto);
         if (booking.getStart().isAfter(booking.getEnd()) ||

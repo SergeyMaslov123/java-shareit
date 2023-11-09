@@ -5,13 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query("select b from Booking b where b.booker.id = ?1")
-    List<Booking> getAllBookingsForUserId(Long user);
-
-    List<Booking> findByItemId(Long item);
-
     List<Booking> findByBooker_IdOrderByStartDesc(Long bookerId);
 
     List<Booking> findByBooker_IdAndEndIsBeforeOrderByStartDesc(Long bookerId, Instant end);
@@ -32,10 +28,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(Long ownerId, Instant start);
 
-    List<Booking> findByBooker_IdAndItem_IdAndStatusAndEndIsBeforeOrderByStartDesc(Long bookerId, Long itemId, Status status, Instant end);
+    boolean existsByBooker_IdAndItem_IdAndStatusAndEndIsBefore(Long bookerId, Long itemId, Status status, Instant end);
 
     List<Booking> findByItem_IdAndStatusAndStartIsBeforeOrderByStartDesc(Long itemId, Status status, Instant start);
 
     List<Booking> findByItem_IdAndStatusAndStartIsAfterOrderByStartAsc(Long itemId, Status status, Instant start);
+
+    List<Booking> findAllByItem_IdInAndStatusAndStartIsBeforeOrderByStartDesc(Set<Long> ids, Status status, Instant instant);
+
+    List<Booking> findAllByItem_IdInAndStatusAndStartIsAfterOrderByStartAsc(Set<Long> ids, Status status, Instant instant);
 
 }

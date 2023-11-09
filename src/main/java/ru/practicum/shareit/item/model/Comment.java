@@ -4,45 +4,43 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import java.time.Instant;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "items", schema = "public")
-public class Item {
+@Table(name = "comments", schema = "public")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
-    @Column(name = "name")
-    private String name;
-    @Column(name = "description")
-    private String description;
-    @Column(name = "available")
-    private Boolean available;
+    @Column(name = "text")
+    private String text;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner", referencedColumnName = "id")
+    @JoinColumn(name = "item", referencedColumnName = "id")
     @ToString.Exclude
-    private User owner;
+    private Item item;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request", referencedColumnName = "id")
+    @JoinColumn(name = "author", referencedColumnName = "id")
     @ToString.Exclude
-    private ItemRequest request;
+    private User author;
+    @Column(name = "created")
+    private Instant created;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Item)) return false;
-        return id != null && id.equals(((Item) o).getId());
+        if (!(o instanceof Comment)) return false;
+        return id != null && id.equals(((Comment) o).getId());
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
+
 }

@@ -39,7 +39,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("user not found"));
         itemRequest.setRequestor(user);
         ItemRequest itemRequest1 = itemRequestRepository.save(itemRequest);
-        itemRequest1.setCreated(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant());
+        itemRequest1.setCreated(Instant.now());
         return ItemRequestMapper.toItemDtoAnswerThenCreate(itemRequest1);
     }
 

@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
+
 @Generated
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {

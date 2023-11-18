@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-class ItemControllerIT {
+class ItemControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -83,7 +83,6 @@ class ItemControllerIT {
     void deleteItem() {
         long userId = 1L;
         long itemId = 1L;
-        itemService.deleteItem(userId, itemId);
 
         mockMvc.perform(delete("/items/{itemId}", itemId).header(Constants.HEADER, userId))
                 .andExpect(status().isOk());

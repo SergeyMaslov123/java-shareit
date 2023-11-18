@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-class UserControllerIT {
+class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -86,5 +86,13 @@ class UserControllerIT {
                 .getContentAsString();
 
         assertEquals(objectMapper.writeValueAsString(userDto), result);
+    }
+    @SneakyThrows
+    @Test
+    public void deleteUser() {
+        Long userId = 1L;
+        mockMvc.perform(delete("/users/{usrId}",userId))
+                .andExpect(status().isOk());
+        verify(userService).deleteUser(userId);
     }
 }

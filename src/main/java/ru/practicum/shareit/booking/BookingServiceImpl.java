@@ -100,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
         List<BookingDtoAnswer> allBookings;
         switch (state) {
             case ALL:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -111,14 +111,14 @@ public class BookingServiceImpl implements BookingService {
                             .map(BookingMapper::toBookingDtoAnswer)
                             .collect(Collectors.toList());
                 } else {
-                allBookings = bookingRepository.findByBooker_IdOrderByStartDesc(userId).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                    allBookings = bookingRepository.findByBooker_IdOrderByStartDesc(userId).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
                 }
                 break;
 
             case PAST:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -132,17 +132,17 @@ public class BookingServiceImpl implements BookingService {
                             .map(BookingMapper::toBookingDtoAnswer)
                             .collect(Collectors.toList());
                 } else {
-                allBookings = bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        )
-                        .stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                    allBookings = bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            )
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
                 }
                 break;
             case WAITING:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -160,7 +160,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
 
             case REJECTED:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -177,7 +177,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case CURRENT:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -202,7 +202,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case FUTURE:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -247,7 +247,7 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case ALL:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -263,7 +263,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case PAST:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -287,7 +287,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case WAITING:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -303,7 +303,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case REJECTED:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -319,7 +319,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case CURRENT:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }
@@ -344,7 +344,7 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case FUTURE:
-                if(from!= null && size != null) {
+                if (from != null && size != null) {
                     if (from < 0 || size < 0) {
                         throw new ValidationEx("некорректный запрос from, size");
                     }

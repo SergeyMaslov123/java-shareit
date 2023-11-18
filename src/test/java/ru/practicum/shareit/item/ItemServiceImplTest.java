@@ -164,7 +164,7 @@ class ItemServiceImplTest {
         long userId = 1L;
         long itemId = 1L;
         Item oldItem = new Item();
-        ItemDto itemDto = new ItemDto(1l, "name", "desc", Boolean.TRUE, null);
+        ItemDto itemDto = new ItemDto(1L, "name", "desc", Boolean.TRUE, null);
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> itemService.updateItem(userId, itemId, itemDto));

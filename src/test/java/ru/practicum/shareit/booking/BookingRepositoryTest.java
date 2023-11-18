@@ -107,17 +107,15 @@ class BookingRepositoryTest {
         commentsRepository.save(comment);
         commentsRepository.save(comment2);
     }
+
     @AfterEach
     public void deleteAll() {
-        System.out.println("delete");
         itemRequestRepository.deleteAll();
         commentsRepository.deleteAll();
         bookingRepository.deleteAll();
         itemRepository.deleteAll();
         userRepository.deleteAll();
     }
-
-
 
 
     @Test

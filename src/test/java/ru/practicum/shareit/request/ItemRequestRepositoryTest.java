@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,13 +39,13 @@ class ItemRequestRepositoryTest {
             null,
             "descr1",
             user1,
-            Instant.now()
+            LocalDateTime.now()
     );
     ItemRequest itemRequest2 = new ItemRequest(
             null,
             "desc2",
             user2,
-            Instant.now()
+            LocalDateTime.now()
     );
 
     @BeforeEach

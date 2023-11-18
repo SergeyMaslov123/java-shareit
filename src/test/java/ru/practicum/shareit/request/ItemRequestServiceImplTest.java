@@ -15,7 +15,7 @@ import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +46,7 @@ class ItemRequestServiceImplTest {
 
         itemRequest.setId(1L);
         itemRequest.setRequestor(user);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         ItemRequestDtoAnswerThenCreate itemRequestDto1 = ItemRequestMapper.toItemDtoAnswerThenCreate(itemRequest);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRequestRepository.save(any())).thenReturn(itemRequest);
@@ -66,7 +66,7 @@ class ItemRequestServiceImplTest {
     @Test
     void getItemRequestForUser_whenItemRequestFoundItemFound_thenReturnListItemRequest() {
         itemRequest.setId(1L);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(user);
         List<ItemRequest> itemRequests = List.of(itemRequest);
         List<Item> items = List.of(item);
@@ -88,7 +88,7 @@ class ItemRequestServiceImplTest {
     @Test
     void getItemRequestForUser_whenItemRequestFoundItemNotFound_thenReturnListItemRequest() {
         itemRequest.setId(1L);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(user);
         List<ItemRequest> itemRequests = List.of(itemRequest);
         when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
@@ -124,7 +124,7 @@ class ItemRequestServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "created");
         Pageable page = PageRequest.of(1, 10, sort);
         itemRequest.setId(1L);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(user);
         List<ItemRequest> itemRequests = List.of(itemRequest);
         Page<ItemRequest> itemRequestPage = new PageImpl<>(itemRequests);
@@ -145,7 +145,7 @@ class ItemRequestServiceImplTest {
         when(itemRequestRepository.findById(1L)).thenReturn(Optional.of(itemRequest));
         when(itemRepository.findAllByRequestId(1L)).thenReturn(List.of(item));
         itemRequest.setId(1L);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setRequestor(user);
         ItemRequestDtoAnswer itemRequestDtoAnswer = ItemRequestMapper.toItemRequestDtoAnswer(itemRequest, List.of(ItemMapper.toItemDto(item)));
         ItemRequestDtoAnswer actualItemRequest = itemRequestService.getItemRequestForId(2L, 1L);

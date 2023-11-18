@@ -17,7 +17,7 @@ import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -49,7 +49,7 @@ class ItemRequestControllerTest {
         long userId = 1L;
         ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "description");
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         itemRequest.setId(1L);
         itemRequest.setRequestor(new User());
         ItemRequestDtoAnswerThenCreate itemRequestDtoAnswerThenCreate = ItemRequestMapper.toItemDtoAnswerThenCreate(itemRequest);

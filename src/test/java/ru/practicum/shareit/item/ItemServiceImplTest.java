@@ -22,7 +22,7 @@ import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,7 +96,7 @@ class ItemServiceImplTest {
                 "Rob1",
                 "stark1@mail.ru"
         );
-        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, Instant.now());
+        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, LocalDateTime.now());
         Item item = ItemMapper.toDtoItem(itemDto);
         item.setOwner(user);
         item.setRequest(itemRequest);
@@ -131,7 +131,7 @@ class ItemServiceImplTest {
                 "Rob1",
                 "stark1@mail.ru"
         );
-        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, Instant.now());
+        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, LocalDateTime.now());
         Item item = ItemMapper.toDtoItem(itemDto);
         item.setOwner(user);
         item.setRequest(itemRequest);

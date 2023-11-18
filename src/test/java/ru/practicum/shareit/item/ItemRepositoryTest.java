@@ -16,7 +16,7 @@ import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,7 +102,7 @@ class ItemRepositoryTest {
                 null,
                 "descr1",
                 user1,
-                Instant.now()
+                LocalDateTime.now()
         );
         itemRequestRepository.save(itemRequest1);
         item2.setRequest(itemRequest1);
@@ -120,7 +120,7 @@ class ItemRepositoryTest {
                 null,
                 "descr1",
                 user1,
-                Instant.now()
+                LocalDateTime.now()
         );
         itemRequestRepository.save(itemRequest1);
         item2.setRequest(itemRequest1);

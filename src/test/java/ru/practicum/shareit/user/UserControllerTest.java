@@ -87,11 +87,12 @@ class UserControllerTest {
 
         assertEquals(objectMapper.writeValueAsString(userDto), result);
     }
+
     @SneakyThrows
     @Test
     public void deleteUser() {
         Long userId = 1L;
-        mockMvc.perform(delete("/users/{usrId}",userId))
+        mockMvc.perform(delete("/users/{usrId}", userId))
                 .andExpect(status().isOk());
         verify(userService).deleteUser(userId);
     }

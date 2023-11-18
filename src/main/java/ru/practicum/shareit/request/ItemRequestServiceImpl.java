@@ -17,9 +17,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import javax.validation.Valid;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,12 +33,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDtoAnswerThenCreate addItemRequest(@Valid ItemRequestDto itemRequestDto, Long userId) {
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
-        itemRequest.setCreated(Instant.now());
+        itemRequest.setCreated(LocalDateTime.now());
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("user not found"));
         itemRequest.setRequestor(user);
-        ItemRequest itemRequest1 = itemRequestRepository.save(itemRequest);
-        itemRequest1.setCreated(ZonedDateTime.now().toInstant());
-        return ItemRequestMapper.toItemDtoAnswerThenCreate(itemRequest1);
+        return ItemRequestMapper.toItemDtoAnswerThenCreate(itemRequestRepository.save(itemRequest));
     }
 
     @Override

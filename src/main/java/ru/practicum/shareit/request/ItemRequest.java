@@ -8,7 +8,7 @@ import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests", schema = "public")
@@ -27,7 +27,7 @@ public class ItemRequest {
     @ToString.Exclude
     private User requestor;
     @Column(name = "created")
-    private Instant created;
+    private LocalDateTime created;
 
 
     @Override

@@ -46,7 +46,7 @@ public class ItemRequestMapper {
         return new ItemRequestDtoAnswer(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
-                itemRequest.getCreated(),
+                itemRequest.getCreated().atZone(ZoneOffset.UTC).toInstant(),
                 itemRequest.getRequestor(),
                 allItem
         );
@@ -56,6 +56,6 @@ public class ItemRequestMapper {
         return new ItemRequestDtoForAll(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
-                itemRequest.getCreated());
+                itemRequest.getCreated().atZone(ZoneOffset.UTC).toInstant());
     }
 }

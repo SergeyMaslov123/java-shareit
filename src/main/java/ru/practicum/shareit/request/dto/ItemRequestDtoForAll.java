@@ -2,11 +2,11 @@ package ru.practicum.shareit.request.dto;
 
 import lombok.Value;
 
-import javax.validation.constraints.NotBlank;
+import java.time.Instant;
 
 @Value
-public class ItemRequestDto {
+public class ItemRequestDtoForAll {
     long id;
-    @NotBlank
     String description;
+    Instant created;
 }

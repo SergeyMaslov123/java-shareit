@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.dto.Marker;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Validated({Marker.OnCreate.class})
-    public UserDto addUser(UserDto userDto) {
+    public UserDto addUser(@Valid UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         user.setId(generatedIdUser);
         generatedIdUser++;

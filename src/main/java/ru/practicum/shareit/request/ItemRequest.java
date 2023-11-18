@@ -7,6 +7,7 @@ import lombok.ToString;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name = "requests", schema = "public")
@@ -19,10 +20,13 @@ public class ItemRequest {
     private Long id;
     @Column(name = "description")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requestor", referencedColumnName = "id")
     @ToString.Exclude
     private User requestor;
+    @Column(name = "created")
+    private Instant created;
+
 
     @Override
     public boolean equals(Object o) {

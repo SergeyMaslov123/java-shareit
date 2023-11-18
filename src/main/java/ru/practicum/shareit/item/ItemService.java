@@ -12,11 +12,11 @@ public interface ItemService {
 
     void deleteItem(long userId, long itemId);
 
-    List<ItemDtoBooking> getItemByUserId(long userId);
+    List<ItemDtoBooking> getItemByUserId(long userId, Integer from, Integer size);
 
     ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
     ItemDtoBooking getItem(long itemId, long userId);
 
-    List<ItemDto> searchItem(String text);
+    List<ItemDto> searchItem(String text, Integer from, Integer size);
 }

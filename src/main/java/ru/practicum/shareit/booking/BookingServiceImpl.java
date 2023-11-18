@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -87,7 +90,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoAnswer> getAllBookingsForUserId(Long userId, String stateStr) {
+    public List<BookingDtoAnswer> getAllBookingsForUserId(Long userId, String stateStr, Integer from, Integer size) {
         State state;
         try {
             state = State.valueOf(stateStr);
@@ -97,12 +100,38 @@ public class BookingServiceImpl implements BookingService {
         List<BookingDtoAnswer> allBookings;
         switch (state) {
             case ALL:
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findAllByBooker_Id(userId, pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
                 allBookings = bookingRepository.findByBooker_IdOrderByStartDesc(userId).stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
+                }
                 break;
 
             case PAST:
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findAllByBooker_idAndEndIsBefore(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
                 allBookings = bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(
                                 userId,
                                 LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
@@ -110,34 +139,90 @@ public class BookingServiceImpl implements BookingService {
                         .stream()
                         .map(BookingMapper::toBookingDtoAnswer)
                         .collect(Collectors.toList());
+                }
                 break;
             case WAITING:
-                allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByBooker_idAndStatus(userId, Status.WAITING, pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
 
             case REJECTED:
-                allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByBooker_idAndStatus(userId, Status.REJECTED, pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case CURRENT:
-                allBookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartAsc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        ).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByBooker_idAndStartIsBeforeAndEndIsAfter(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case FUTURE:
-                allBookings = bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        ).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByBooker_IdAndStartIsAfter(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             default:
                 throw new ValidationEx("Unknown state: " + state);
@@ -150,7 +235,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoAnswer> getAllBookingForUserOwner(Long userId, String stateStr) {
+    public List<BookingDtoAnswer> getAllBookingForUserOwner(Long userId, String stateStr, Integer from, Integer size) {
         State state;
         try {
             state = State.valueOf(stateStr);
@@ -159,47 +244,127 @@ public class BookingServiceImpl implements BookingService {
 
         }
         List<BookingDtoAnswer> allBookings;
+
         switch (state) {
             case ALL:
-                allBookings = bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_Id(userId, pageable).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case PAST:
-                allBookings = bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        )
-                        .stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_IdAndEndIsBefore(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable)
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            )
+                            .stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case WAITING:
-                allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.WAITING, pageable).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case REJECTED:
-                allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.REJECTED, pageable).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case CURRENT:
-                allBookings = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        ).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             case FUTURE:
-                allBookings = bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(
-                                userId,
-                                LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
-                        ).stream()
-                        .map(BookingMapper::toBookingDtoAnswer)
-                        .collect(Collectors.toList());
+                if(from!= null && size != null) {
+                    if (from < 0 || size < 0) {
+                        throw new ValidationEx("некорректный запрос from, size");
+                    }
+                    Sort sort = Sort.by(Sort.Direction.DESC, "Start");
+                    Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStartIsAfter(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant(),
+                                    pageable
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                } else {
+                    allBookings = bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(
+                                    userId,
+                                    LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()
+                            ).stream()
+                            .map(BookingMapper::toBookingDtoAnswer)
+                            .collect(Collectors.toList());
+                }
                 break;
             default:
                 throw new ValidationEx("Unknown state: " + state);

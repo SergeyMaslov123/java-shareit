@@ -198,6 +198,8 @@ class BookingServiceImplTest {
     @Test
     void getBooking_whenUserNotBookerAndNotOwner_thenThrowEntityNotFoundEx() {
         long userId = 2L;
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
         assertThrows(EntityNotFoundException.class, () -> bookingService.getBooking(bookingId, userId));
     }
 
@@ -475,6 +477,88 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getAllBookingForUserId_whenFromSizeNullAll_thenReturnBookings() {
+        String stateString = "ALL";
+        when(bookingRepository.findByBooker_IdOrderByStartDesc(userId)).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserId_whenFromSizeNullPast_thenReturnBookings() {
+        String stateString = "PAST";
+        when(bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(eq(userId), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserId_whenFromSizeNullWAITING_thenReturnBookings() {
+        String stateString = "WAITING";
+        when(bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserId_whenFromSizeNullREJECTED_thenReturnBookings() {
+        String stateString = "REJECTED";
+        when(bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserId_whenFromSizeNullCURRENT_thenReturnBookings() {
+        String stateString = "CURRENT";
+        when(bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(), any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserId_whenFromSizeNullFUTURE_thenReturnBookings() {
+        String stateString = "FUTURE";
+        when(bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingsForUserId(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+
+    @Test
+    void getAllBookingsForUserId_whenFromSizeNotValid_thenThrowValidationEx() {
+        String stateStringAll = "ALL";
+        String stateStringPast = "PAST";
+        String stateStringWAITING = "WAITING";
+        String stateStringREJECTED = "REJECTED";
+        String stateStringCURRENT = "CURRENT";
+        String stateStringFUTURE = "FUTURE";
+
+        int from = -1;
+        int size = 10;
+
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringAll, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringPast, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringWAITING, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringREJECTED, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringCURRENT, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingsForUserId(1L, stateStringFUTURE, from, size));
+
+    }
+
+    @Test
     void getAllBookingForUserOwner_whenBookingFoundStateALL_thenReturnListBooking() {
         String stateString = "ALL";
         Sort sort = Sort.by(Sort.Direction.DESC, "Start");
@@ -641,6 +725,87 @@ class BookingServiceImplTest {
         verify(bookingRepository, never()).findByItem_Owner_IdAndStatus(any(), any(), any());
         verify(bookingRepository, never()).findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
         verify(bookingRepository, never()).findByItem_Owner_IdAndStartIsAfter(any(), any(), any());
+
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullALL_thenReturnBookings() {
+        String stateString = "ALL";
+        when(bookingRepository.findByItem_Owner_IdOrderByStartDesc(any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullPAST_thenReturnBookings() {
+        String stateString = "PAST";
+        when(bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullWAITING_thenReturnBookings() {
+        String stateString = "WAITING";
+        when(bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullREJECTED_thenReturnBookings() {
+        String stateString = "REJECTED";
+        when(bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullCURRENT_thenReturnBookings() {
+        String stateString = "CURRENT";
+        when(bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(any(), any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromSizeNullFUTURE_thenReturnBookings() {
+        String stateString = "FUTURE";
+        when(bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDtoAnswer> bookings = bookingService.getAllBookingForUserOwner(userId, stateString, null, null);
+
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void getAllBookingForUserOwner_whenFromAndSizeNotValid_thenReturnValidationEx() {
+        String stateStringAll = "ALL";
+        String stateStringPast = "PAST";
+        String stateStringWAITING = "WAITING";
+        String stateStringREJECTED = "REJECTED";
+        String stateStringCURRENT = "CURRENT";
+        String stateStringFUTURE = "FUTURE";
+
+        int from = -1;
+        int size = 10;
+
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringAll, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringPast, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringWAITING, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringREJECTED, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringCURRENT, from, size));
+        assertThrows(ValidationEx.class, () -> bookingService.getAllBookingForUserOwner(1L, stateStringFUTURE, from, size));
 
     }
 }

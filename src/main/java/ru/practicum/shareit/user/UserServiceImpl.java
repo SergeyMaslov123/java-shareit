@@ -44,6 +44,9 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(Long userId, UserDto userDto) {
         User oldUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
+        if (userDto.getName() == null && userDto.getEmail() == null) {
+            throw new ValidationEx("email, name null");
+        }
         User user = UserMapper.toUser(userDto);
         String name = user.getName();
         String email = user.getEmail();
@@ -51,8 +54,6 @@ public class UserServiceImpl implements UserService {
             user.setName(oldUser.getName());
         } else if (email == null || email.isBlank()) {
             user.setEmail(oldUser.getEmail());
-        } else if (user.getName() == null && user.getEmail() == null) {
-            throw new ValidationEx("email/ name is empty");
         }
         user.setId(userId);
         return UserMapper.toUserDto(userRepository.save(user));

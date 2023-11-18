@@ -22,7 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommentsServiceImplTest {
@@ -82,5 +82,40 @@ class CommentsServiceImplTest {
         long userId = 1L;
 
         assertThrows(ValidationEx.class, () -> commentsService.addComments(commentDtoRequest, itemId, userId));
+    }
+
+    @Test
+    void addComments_whenItemAndUserFoundAndUserHaveBookingNot_returnComment() {
+        long itemId = 1L;
+        long userId = 1L;
+        User user = new User(
+                1L,
+                "Rob",
+                "stark@mail.ru"
+        );
+        Item item = new Item(
+                1L,
+                "item1",
+                "desc1",
+                Boolean.TRUE,
+                user,
+                null
+        );
+        Comment comment = new Comment(
+                1L,
+                "text",
+                item,
+                user,
+                Instant.now()
+        );
+        CommentDtoRequest commentDtoRequest = new CommentDtoRequest(1L, "text");
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.existsByBooker_IdAndItem_IdAndStatusAndEndIsBefore(eq(1L), eq(1L), eq(Status.APPROVED), any())
+        ).thenReturn(Boolean.FALSE);
+
+        assertThrows(ValidationEx.class, () -> commentsService.addComments(commentDtoRequest, itemId, userId));
+
+        verify(commentsRepository, never()).save(comment);
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
+@Generated
 public class ExceptionHandles {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

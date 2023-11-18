@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.ValidationEx;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
@@ -195,5 +196,34 @@ public class UserServiceImplTest {
         List<UserDto> actualUsersDto = userService.allUser();
 
         assertEquals(allUsersDto.size(), actualUsersDto.size());
+    }
+
+    @Test
+    void deleteUser() {
+        userRepository.deleteById(1L);
+    }
+
+    @Test
+    void updateUser_whenParamNewUserIsValidAllNot_thenReturnNewUser() {
+        UserDto oldUserDto = new UserDto(
+                1L,
+                "John",
+                "john.doe@mail.com"
+        );
+        UserDto newUserDto = new UserDto(
+                1L,
+                null,
+                null
+        );
+
+        Long userId = 1L;
+        User oldUser = UserMapper.toUser(oldUserDto);
+        oldUser.setId(userId);
+        User newUser = UserMapper.toUser(newUserDto);
+        newUser.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(oldUser));
+
+        assertThrows(ValidationEx.class, () -> userService.updateUser(userId, newUserDto));
+
     }
 }

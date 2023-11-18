@@ -2,11 +2,13 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.item.model.Comment;
 
 import java.time.ZoneOffset;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Generated
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
         String created = comment.getCreated().atZone(ZoneOffset.UTC).toString();

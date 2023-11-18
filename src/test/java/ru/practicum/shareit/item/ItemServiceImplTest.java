@@ -7,6 +7,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.autoconfigure.cassandra.CassandraProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -17,9 +18,12 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +41,8 @@ class ItemServiceImplTest {
     private BookingRepository bookingRepository;
     @Mock
     private CommentsRepository commentsRepository;
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
 
     @InjectMocks
     private ItemServiceImpl itemService;
@@ -69,8 +75,73 @@ class ItemServiceImplTest {
 
         assertEquals(actualItemDto, itemDto);
         verify(itemRepository).save(item);
+    }
 
+    @Test
+    void addItem_whenUserFoundRequestFound_thenReturnItemDto() {
+        long userId = 1L;
+        ItemDto itemDto = new ItemDto(
+                1L,
+                "item1",
+                "desc1",
+                Boolean.TRUE,
+                1L
+        );
+        User user = new User(
+                1L,
+                "Rob",
+                "stark@mail.ru"
+        );
+        User user2 = new User(
+                2L,
+                "Rob1",
+                "stark1@mail.ru"
+        );
+        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, Instant.now());
+        Item item = ItemMapper.toDtoItem(itemDto);
+        item.setOwner(user);
+        item.setRequest(itemRequest);
 
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRequestRepository.findById(any())).thenReturn(Optional.of(itemRequest));
+
+        ItemDto actualItemDto = itemService.addItem(itemDto, userId);
+
+        assertEquals(actualItemDto, itemDto);
+        verify(itemRepository).save(item);
+    }
+
+    @Test
+    void addItem_whenUserFoundRequestNotFound_thenReturnItemDto() {
+        long userId = 1L;
+        ItemDto itemDto = new ItemDto(
+                1L,
+                "item1",
+                "desc1",
+                Boolean.TRUE,
+                1L
+        );
+        User user = new User(
+                1L,
+                "Rob",
+                "stark@mail.ru"
+        );
+        User user2 = new User(
+                2L,
+                "Rob1",
+                "stark1@mail.ru"
+        );
+        ItemRequest itemRequest = new ItemRequest(1L, "desc", user2, Instant.now());
+        Item item = ItemMapper.toDtoItem(itemDto);
+        item.setOwner(user);
+        item.setRequest(itemRequest);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(EntityNotFoundException.class, () -> itemService.addItem(itemDto, userId));
+
+        verify(itemRepository, never()).save(item);
     }
 
     @Test
@@ -115,6 +186,42 @@ class ItemServiceImplTest {
         when(itemRepository.findAllByOwnerId(userId, pageable)).thenReturn(itemsPage);
 
         List<ItemDtoBooking> actualListItemDto = itemService.getItemByUserId(userId, 5, 3);
+
+        assertEquals(listItems.size(), actualListItemDto.size());
+        assertEquals(listItems, actualListItemDto);
+    }
+
+    @Test
+    void getItemByUserId_whenFromSizeNot_thenReturnItems() {
+        long userId = 1L;
+        User user = new User(
+                1L,
+                "Rob",
+                "stark@mail.ru"
+        );
+        Item item = new Item(
+                1L,
+                "item1",
+                "desc1",
+                Boolean.TRUE,
+                user,
+                null
+        );
+        Item item2 = new Item(
+                2L,
+                "item2",
+                "desc2",
+                Boolean.TRUE,
+                user,
+                null
+        );
+
+        ItemDtoBooking itemDtoBooking1 = ItemMapper.toItemDtoBooking(item, null, null, List.of());
+        ItemDtoBooking itemDtoBooking2 = ItemMapper.toItemDtoBooking(item2, null, null, List.of());
+        List<ItemDtoBooking> listItems = List.of(itemDtoBooking1, itemDtoBooking2);
+        when(itemRepository.findByOwnerId(userId)).thenReturn(List.of(item, item2));
+
+        List<ItemDtoBooking> actualListItemDto = itemService.getItemByUserId(userId, null, null);
 
         assertEquals(listItems.size(), actualListItemDto.size());
         assertEquals(listItems, actualListItemDto);
@@ -372,6 +479,40 @@ class ItemServiceImplTest {
 
         assertEquals(0, actualListItems.size());
         verify(itemRepository, never()).searchItemPage(text, pageable);
+    }
+
+    @Test
+    void searchItem_whenTextNotBlanckItemFoundFromSizeNull_thenReturnListItem() {
+        String text = "test text";
+        User user = new User(
+                1L,
+                "Rob",
+                "stark@mail.ru"
+        );
+        Item item1 = new Item(
+                1L,
+                "item1",
+                "desc1",
+                Boolean.TRUE,
+                user,
+                null
+        );
+        Item item2 = new Item(
+                1L,
+                "item2",
+                null,
+                Boolean.TRUE,
+                user,
+                null
+        );
+        List<Item> items = List.of(item1, item2);
+        when(itemRepository.searchItem(text)).thenReturn(items);
+        List<ItemDto> itemsDto = items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+
+        List<ItemDto> actualListItems = itemService.searchItem(text, null, null);
+
+        assertEquals(itemsDto, actualListItems);
+        assertEquals(itemsDto.size(), actualListItems.size());
     }
 
 }

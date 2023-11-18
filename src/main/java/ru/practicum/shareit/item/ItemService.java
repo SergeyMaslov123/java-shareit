@@ -1,12 +1,13 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
 
 import javax.validation.Valid;
 import java.util.List;
 
-
+@Generated
 public interface ItemService {
     ItemDto addItem(@Valid ItemDto itemDto, long userId);
 

@@ -44,6 +44,8 @@ class ItemControllerIT {
         long userId = 1L;
         int from = 1;
         int size = 10;
+        when(itemService.getItemByUserId(userId, from, size)).thenReturn(List.of());
+
         mockMvc.perform(get("/items?from=1&size=10").header(Constants.HEADER, userId))
                 .andExpect(status().isOk());
 
@@ -81,6 +83,8 @@ class ItemControllerIT {
     void deleteItem() {
         long userId = 1L;
         long itemId = 1L;
+        itemService.deleteItem(userId, itemId);
+
         mockMvc.perform(delete("/items/{itemId}", itemId).header(Constants.HEADER, userId))
                 .andExpect(status().isOk());
         verify(itemService).deleteItem(userId, itemId);

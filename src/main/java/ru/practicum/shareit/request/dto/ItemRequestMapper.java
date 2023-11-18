@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.dto;
 
 import lombok.SneakyThrows;
+import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.ItemRequest;
 
@@ -11,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+@Generated
 public class ItemRequestMapper {
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
         return new ItemRequest(

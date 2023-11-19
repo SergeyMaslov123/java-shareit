@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoAnswer;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
-import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.user.dto.UserMapper;
 
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@Generated
 public class BookingMapper {
 
     public static BookingDto toBookingDto(Booking booking) {

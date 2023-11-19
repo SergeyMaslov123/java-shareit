@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
@@ -15,7 +14,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "items", schema = "public")
-@Generated
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

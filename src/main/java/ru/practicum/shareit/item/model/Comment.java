@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.exception.Generated;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
@@ -15,7 +14,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "comments", schema = "public")
-@Generated
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -17,8 +17,10 @@ public class ItemController {
     private final CommentsService commentsService;
 
     @GetMapping
-    public List<ItemDtoBooking> getItemByUser(@RequestHeader(Constants.HEADER) Long userId) {
-        return itemService.getItemByUserId(userId);
+    public List<ItemDtoBooking> getItemByUser(@RequestHeader(Constants.HEADER) Long userId,
+                                              @RequestParam(required = false) Integer from,
+                                              @RequestParam(required = false) Integer size) {
+        return itemService.getItemByUserId(userId, from, size);
     }
 
     @PostMapping
@@ -42,8 +44,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam String text) {
-        return itemService.searchItem(text);
+    public List<ItemDto> searchItem(@RequestParam String text,
+                                    @RequestParam(required = false) Integer from,
+                                    @RequestParam(required = false) Integer size) {
+        return itemService.searchItem(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

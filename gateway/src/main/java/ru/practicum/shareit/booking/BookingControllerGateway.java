@@ -30,7 +30,6 @@ public class BookingControllerGateway {
                                               @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-//        log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
         return bookingClient.getBookings(userId, state, from, size);
     }
 

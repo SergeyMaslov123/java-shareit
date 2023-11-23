@@ -2,19 +2,25 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.ConstatntsGateway;
 import ru.practicum.shareit.request.dto.RequestRequestDto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/requests")
+@Validated
 public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
     public ResponseEntity<Object> addRequest(@RequestHeader(ConstatntsGateway.HEADER) Long userId,
-                                             @RequestBody RequestRequestDto itemRequestDto) {
+                                             @Valid  @RequestBody RequestRequestDto itemRequestDto) {
         return requestClient.addRequest(itemRequestDto, userId);
     }
 
@@ -25,8 +31,8 @@ public class RequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAllItemRequest(@RequestHeader(ConstatntsGateway.HEADER) Long userId,
-                                                    @RequestParam(required = false) Integer from,
-                                                    @RequestParam(required = false) Integer size) {
+                                                    @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                    @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return requestClient.getAllItemRequest(userId, from, size);
     }
 

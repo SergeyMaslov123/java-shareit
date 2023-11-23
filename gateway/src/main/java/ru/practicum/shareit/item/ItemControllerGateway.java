@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.dto.ItemRequestDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.ArrayList;
 
 @Controller
 @RequestMapping(path = "/items")
@@ -58,7 +59,7 @@ public class ItemControllerGateway {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> addComments(@RequestHeader(ConstatntsGateway.HEADER) Long userId, @PathVariable Long itemId, @RequestBody CommentRequestDto commentDto) {
+    public ResponseEntity<Object> addComments(@RequestHeader(ConstatntsGateway.HEADER) Long userId, @PathVariable Long itemId, @Valid @RequestBody CommentRequestDto commentDto) {
         return itemClient.addComments(commentDto, itemId, userId);
     }
 

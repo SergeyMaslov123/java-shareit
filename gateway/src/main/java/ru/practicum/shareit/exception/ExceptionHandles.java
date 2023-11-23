@@ -29,12 +29,14 @@ public class ExceptionHandles {
     public ErrorResponse handle(final ValidationEx ex) {
         return new ErrorResponse(ex.getMessage());
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleTr(final EntityNotFoundException ex) {
         return Map.of("not found error", ex.getMessage());
     }
-        @ExceptionHandler
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleTr(final IllegalArgumentException ex) {
         return new ErrorResponse(ex.getMessage());

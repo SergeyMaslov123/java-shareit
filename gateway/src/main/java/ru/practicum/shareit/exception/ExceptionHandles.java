@@ -45,7 +45,7 @@ public class ExceptionHandles {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handle (final MethodArgumentNotValidException ex) {
+    public ErrorResponse handle(final MethodArgumentNotValidException ex) {
         return new ErrorResponse(ex.getMessage());
     }
 

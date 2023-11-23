@@ -13,7 +13,6 @@ import ru.practicum.shareit.item.dto.ItemRequestDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.ArrayList;
 
 @Controller
 @RequestMapping(path = "/items")

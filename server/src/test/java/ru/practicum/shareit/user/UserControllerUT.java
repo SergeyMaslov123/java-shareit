@@ -73,6 +73,6 @@ class UserControllerUT {
 
         UserDto actualUser = userController.updateUser(userId, userDto);
 
-        assertEquals(userDto,actualUser);
+        assertEquals(userDto, actualUser);
     }
 }
